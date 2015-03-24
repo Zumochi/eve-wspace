@@ -1661,6 +1661,14 @@ function scale(factor) {
     RefreshMap();
 }
 
+function ResetScale() {
+    // NOTE: This does NOT reset the slider.
+    // TODO: Make it so it resets the slider position :P
+    $('#btnResetScale').click(function() {
+        scale(baseScale);
+    });
+}
+
 function ToggleZen() {
     if (zenMode === true) {
         zenMode = false;

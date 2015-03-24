@@ -25,14 +25,17 @@ var updateTimerID;
 var refreshTimerID;
 var systemsJSON;
 var activityLimit = 100;
-var scalingFactor = 1; //scale the interface
-var textFontSize = 11; // The base font size
-var indentX = 150; // The amount of space (in px) between system ellipses on the X axis. Should be between 120 and 180
-var indentY = 70; // The amount of space (in px) between system ellipses on the Y axis.
-var strokeWidth = 3; // The width in px of the line connecting wormholes
-var interestWidth = 3; // The width in px of the line connecting wormholes when interest is on
+var scalingFactor = 1; // Scaling factor
+var baseScale = 1; // Base scale
+var textFontSize, indentX, indentY, strokeWidth, interestWidth;
+var baseTextFontSize = 11; // The base font size
+var baseIndentX = 150; // The amount of space (in px) between system ellipses on the X axis. Should be between 120 and 180
+var baseIndentY = 70; // The amount of space (in px) between system ellipses on the Y axis
+var baseStrokeWidth = 3; // The width in px of the line connecting wormholes
+var baseInterestWidth = 3; // The width in px of the line connecting wormholes when interest is on
 var renderWormholeTags = true; // Determines whether wormhole types are shown on the map
-var sliceLastChars = false; // Friendly name should show last 8 chars if over 8, shows first 8 if false
+var sliceLastChars = false; // Slice last X amount of characters from friendly system name (also see sliceNumChars)
+var sliceNumChars = 8; // Character limit after which slicing occurs
 var showPilotList = true; // Show pilot names under systems
 var highlightActivePilots = false; // Draw a notification ring around systems with active pilots.
 var goodColor = "#00FF00"; // Color of good status connections
@@ -86,15 +89,25 @@ var kspaceIGBMapping = false; // Do we map K<>K connections from the IGB?
 var zenMode = false;
 
 
-
 function s(n) { //apply scaling factor, short function name so it's quick to type
     return Math.ceil(n * scalingFactor)
 }
 
 $(document).ready(function () {
-    $('.slider').slider().on('slide', function(ev) {
-        scale(ev.value);
+    $('.slider').slider({
+            min: 0.5,
+            max: 2.0,
+            step: 0.05,
+            precision: 2,
+            orientation: 'horizontal',
+            selection: 'after',
+            tooltip: 'show',
+            value: baseScale
+        }
+    ).on('slide', function(e) {
+        scale(e.value);
     });
+
     updateTimerID = setInterval(doMapAjaxCheckin, 5000);
     if (autoRefresh === true) {
         $('#btnRefreshToggle').text('Auto Refresh: ON');
@@ -836,7 +849,6 @@ function StartDrawing() {
     }
 }
 
-
 function GetSysID(msID) {
     //get systemID from msID
     for (var i = 0; i < systemsJSON.length; i++) {
@@ -892,18 +904,20 @@ function ConnectSystems(obj1, obj2, line, bg, interest, dasharray) {
         y3 = [0, 0, 0, 0, y1 + dy, y1 - dy, y4, y4][res[1]].toFixed(3);
 
     var path = ["M", x1.toFixed(3), y1.toFixed(3), "C", x2, y2, x3, y3, x4.toFixed(3), y4.toFixed(3)].join(",");
+
     if (line && line.line) {
         line.bg && line.bg.attr({path: path});
         line.line.attr({path: path});
     } else {
-        var color = typeof line == "string" ? line : "#000";
+        var color = typeof line === "string" ? line : "#000";
         if (!renderWormholeTags) {
             if (systemTo.WhFromParentBubbled || systemTo.WhToParentBubbled) {
                 color = "#FF9900";
             }
         }
+
         var lineObj;
-        if (interest == true) {
+        if (interest === true) {
             lineObj = paper.path(path).attr({
                 stroke: color,
                 fill: "none",
@@ -946,10 +960,12 @@ function InitializeRaphael() {
     }
     var holderHeight = s(90) + maxLevelY * indentY;
     var holderWidth = s(170) + maxLevelX * (indentX + s(20));
+
     if (paper) {
         paper.clear();
         paper.remove();
     }
+
     paper = Raphael("mapDiv", holderWidth, holderHeight);
     var holder = document.getElementById("mapDiv");
     holder.style.height = holderHeight + "px";
@@ -975,11 +991,13 @@ function GetSystemY(system) {
 }
 
 function DrawSystem(system) {
-    if (system == null) {
+    if (system === null) {
         return;
     }
+
     var sysX = GetSystemX(system);
     var sysY = GetSystemY(system);
+
     var classString;
     switch (system.SysClass) {
         case 7:
@@ -1001,53 +1019,58 @@ function DrawSystem(system) {
             classString = "C" + system.SysClass;
             break;
     }
+
     var effectString;
     switch (system.effect) {
         case "Wolf-Rayet Star":
-            effectString = "+W"
+            effectString = "+W";
             break;
         case "Pulsar":
-            effectString = "+P"
+            effectString = "+P";
             break;
         case "Magnetar":
-            effectString = "+M"
+            effectString = "+M";
             break;
         case "Red Giant":
-            effectString = "+R"
+            effectString = "+R";
             break;
         case "Cataclysmic Variable":
-            effectString = "+C"
+            effectString = "+C";
             break;
         case "Black Hole":
-            effectString = "+B"
+            effectString = "+B";
             break;
         default:
             effectString = "";
             break;
     }
     var friendly = "";
+
     if (system.Friendly) {
-        if (system.Friendly.length > 6) {
-            if (sliceLastChars == true) {
-                system.Friendly = "." + system.Friendly.slice(-6);
+        if (system.Friendly.length > sliceNumChars) {
+            if (sliceLastChars === true) {
+                system.Friendly = "." + system.Friendly.slice(-sliceNumChars);
             } else {
-                system.Friendly = system.Friendly.slice(0, 6) + ".";
+                system.Friendly = system.Friendly.slice(0, sliceNumChars) + ".";
             }
         }
         friendly = system.Friendly + "\n";
     }
+
     var sysName = friendly + system.Name + "\n" + classString + effectString + "(" + system.activePilots + ")";
+
     if (zenMode) {
-        if ((classString == "H") || (classString == "N") || (classString == "L") || (classString == "T")) {
+        if ((classString === "H") || (classString === "N") || (classString === "L") || (classString === "T")) {
             sysName = friendly + system.Name.substr(0,6);
         } else {
             sysName = friendly + classString;
         }
     }
+
     var pilotText = "";
     var pilotsadded = 0;
     if (system.activePilots) {
-        if (system.activePilots == 1) {
+        if (system.activePilots === 1) {
             pilotText += system.pilot_list[0];
         } else {
             for (var i = 0; i < system.pilot_list.length; i++) {
@@ -1155,10 +1178,10 @@ function DrawSystem(system) {
 function GetConnectionDash(system) {
     var eolDash = "-";
     var interestDash = "--";
-    if (system.WhTimeStatus == 1) {
+    if (system.WhTimeStatus === 1) {
         return eolDash;
     }
-    if (system.interestpath == true || system.interest == true) {
+    if (system.interestpath === true || system.interest === true) {
         return interestDash;
     }
     return "none";
@@ -1173,16 +1196,16 @@ function GetConnectionColor(system) {
     }
     var badFlag = false;
     var warningFlag = false;
-    if (system.WhMassStatus == 2) {
+    if (system.WhMassStatus === 2) {
         badFlag = true;
     }
-    if (system.WhMassStatus == 1) {
+    if (system.WhMassStatus === 1) {
         warningFlag = true;
     }
-    if (badFlag == true) {
+    if (badFlag === true) {
         return badColor;
     }
-    if (warningFlag == true) {
+    if (warningFlag === true) {
         return warningColor;
     }
     // If jump mass is not 0 (K162 / Gate), but less than 10M,
@@ -1210,7 +1233,7 @@ function GetWormholeColor(system) {
     if (system.LevelX < 1) {
         return "#000";
     }
-    if (system.WhToParentBubbled == true && system.WhFromParentBubbled == true) {
+    if (system.WhToParentBubbled === true && system.WhFromParentBubbled === true) {
         return badColor;
     } else {
         return goodColor;
@@ -1228,7 +1251,7 @@ function ColorSystem(system, ellipseSystem, textSysName, textPilot) {
     var sysStrokeWidth = s(2);
     var sysStrokeDashArray = "none";
     var textColor = "#000";
-    if (system.interest == true) {
+    if (system.interest === true) {
         sysStrokeWidth = s(7);
         sysStrokeDashArray = "--";
     }
@@ -1356,11 +1379,12 @@ function ColorSystem(system, ellipseSystem, textSysName, textPilot) {
         "stroke-dasharray": sysStrokeDashArray
     });
     textSysName.attr({fill: textColor, "font-size": labelFontSize, cursor: "pointer"});
-    if (textPilot != null) textPilot.attr({fill: pilotColor, "font-size": textFontSize-s(1), cursor: "pointer"});
 
+    if (textPilot != null) {
+        textPilot.attr({fill: pilotColor, "font-size": textFontSize-s(1), cursor: "pointer"});
+    }
 
-
-    if (selected == false) {
+    if (selected === false) {
         ellipseSystem.sysInfoPnlID = 0;
         textSysName.sysInfoPnlID = 0;
 
@@ -1448,7 +1472,7 @@ function DrawWormholes(systemFrom, systemTo, textColor) {
 
     // draws labels near systemTo ellipse if previous same Level X system's levelY = systemTo.levelY - 1
     if (!zenMode) {
-        if (changePos == true) {
+        if (changePos === true) {
 
             textCenterX = sysX2 - s(73);
             textCenterY = sysY2 - s(30);
@@ -1469,14 +1493,14 @@ function DrawWormholes(systemFrom, systemTo, textColor) {
         var whToColor = null;
         var decoration = null;
 
-        if (systemTo.WhFromParentBubbled == true) {
+        if (systemTo.WhFromParentBubbled === true) {
             whFromColor = bubbledColor;
             decoration = "bold";
         } else {
             whFromColor = clearWhColor;
         }
 
-        if (systemTo.WhToParentBubbled == true) {
+        if (systemTo.WhToParentBubbled === true) {
             whToColor = bubbledColor;
             decoration = "bold";
         } else {
@@ -1535,7 +1559,7 @@ function GetSystemIndex(systemID) {
     var index = -1;
     for (var i = 0; i < stellarSystemsLength; i++) {
         var stellarSystem = systemsJSON[i];
-        if (stellarSystem.msID == systemID) {
+        if (stellarSystem.msID === systemID) {
             index = i;
             return index;
         }
@@ -1547,7 +1571,7 @@ function GetSystemIndex(systemID) {
 
 function getScrollY() {
     var scrOfY = 0;
-    if (typeof (window.pageYOffset) == 'number') {
+    if (typeof (window.pageYOffset) === 'number') {
         //Netscape compliant
         scrOfY = window.pageYOffset;
     } else if (document.body && (document.body.scrollLeft || document.body.scrollTop)) {
@@ -1562,7 +1586,7 @@ function getScrollY() {
 
 function getScrollX() {
     var scrOfX = 0;
-    if (typeof (window.pageYOffset) == 'number') {
+    if (typeof (window.pageYOffset) === 'number') {
         //Netscape compliant
         scrOfX = window.pageXOffset;
     } else if (document.body && (document.body.scrollLeft || document.body.scrollTop)) {
@@ -1629,16 +1653,16 @@ function onSysOut() {
 
 function scale(factor) {
     scalingFactor = factor;
-    textFontSize = s(11); // The base font size
-    indentX = s(150); // The amount of space (in px) between system ellipses on the X axis. Should be between 120 and 180
-    indentY = s(70); // The amount of space (in px) between system ellipses on the Y axis.
-    strokeWidth = s(3); // The width in px of the line connecting wormholes
-    interestWidth = s(3); // The width in px of the line connecting wormholes when interest is on
+    textFontSize = s(baseTextFontSize);
+    indentX = s(baseIndentX);
+    indentY = s(baseIndentY);
+    strokeWidth = s(baseStrokeWidth);
+    interestWidth = s(baseInterestWidth);
     RefreshMap();
 }
 
-function togglezen() {
-    if (zenMode == true) {
+function ToggleZen() {
+    if (zenMode === true) {
         zenMode = false;
         $('#btnZen').text("Zen: OFF");
     } else {
@@ -1648,8 +1672,8 @@ function togglezen() {
     RefreshMap();
 }
 
-function togglepilotlist() {
-    if (showPilotList == true) {
+function TogglePilotList() {
+    if (showPilotList === true) {
         showPilotList = false;
         highlightActivePilots = true;
         $('#btnPilotList').text("Pilot List: OFF");
@@ -1672,4 +1696,3 @@ function MoveSystemUp(msID) {
         }
     });
 }
-

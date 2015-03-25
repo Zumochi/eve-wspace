@@ -29,8 +29,8 @@ var scalingFactor = 1; // Scaling factor
 var baseScale = 1; // Base scale
 var textFontSize, indentX, indentY, strokeWidth, interestWidth;
 var baseTextFontSize = 11; // The base font size
-var baseIndentX = 150; // The amount of space (in px) between system ellipses on the X axis. Should be between 120 and 180
-var baseIndentY = 70; // The amount of space (in px) between system ellipses on the Y axis
+var baseIndentX = 150; // The amount of space (in px) between system rectangles on the X axis. Should be between 120 and 180
+var baseIndentY = 70; // The amount of space (in px) between system rectangles on the Y axis
 var baseStrokeWidth = 3; // The width in px of the line connecting wormholes
 var baseInterestWidth = 3; // The width in px of the line connecting wormholes when interest is on
 var renderWormholeTags = true; // Determines whether wormhole types are shown on the map
@@ -1115,9 +1115,9 @@ function DrawSystem(system) {
     }
     var sysText;
     if (system.LevelX != null && system.LevelX > 0) {
-        var childSys = paper.ellipse(sysX, sysY, s(40), s(28));
+        var childSys = paper.rect(sysX - s(28), sysY - s(25), s(56), s(50), 6);
         if (system.activePilots > 0 && highlightActivePilots === true) {
-            var notificationRing = paper.ellipse(sysX, sysY, s(45), s(33));
+            var notificationRing = paper.rect(sysX - s(28), sysY - s(25), s(56), s(50));
             notificationRing.attr({'stroke-dasharray': '--', 'stroke-width': s(1), 'stroke': '#ffffff'});
         }
         childSys.msID = system.msID;
@@ -1153,9 +1153,9 @@ function DrawSystem(system) {
         objSystems.push(childSys);
         var parentIndex = GetSystemIndex(system.ParentID);
         var parentSys = systemsJSON[parentIndex];
-        var parentSysEllipse = objSystems[parentIndex];
+        var parentSysRectangle = objSystems[parentIndex];
 
-        if (parentSysEllipse) {
+        if (parentSysRectangle) {
             var lineColor = GetConnectionColor(system);
             var whColor = GetWormholeColor(system);
             var dasharray = GetConnectionDash(system);
@@ -1164,14 +1164,14 @@ function DrawSystem(system) {
                 interest = true;
             }
             if (childSys.collapsed === false || renderCollapsedConnections === true) {
-                ConnectSystems(parentSysEllipse, childSys, lineColor, "#fff", interest, dasharray);
+                ConnectSystems(parentSysRectangle, childSys, lineColor, "#fff", interest, dasharray);
                 DrawWormholes(parentSys, system, whColor);
             }
         } else {
             alert("Error processing system " + system.Name);
         }
     } else {
-        var rootSys = paper.ellipse(sysX, sysY, s(40), s(30));
+        var rootSys = paper.rect(sysX - s(28), sysY - s(25), s(56), s(50), 6);
         rootSys.msID = system.msID;
         rootSys.sysID = system.sysID;
         // Don't even get me started...
@@ -1266,7 +1266,7 @@ function GetWormholeColor(system) {
     }
 }
 
-function ColorSystem(system, ellipseSystem, textSysName, textPilot) {
+function ColorSystem(system, rectSystem, textSysName, textPilot) {
     if (!system) {
         alert("system is null or undefined");
         return;
@@ -1392,12 +1392,12 @@ function ColorSystem(system, ellipseSystem, textSysName, textPilot) {
         }
         sysStrokeDashArray = "--"
     }
-    var iconX = ellipseSystem.attr("cx") + s(40);
-    var iconY = ellipseSystem.attr("cy") - s(35);
+    var iconX = rectSystem.attr("cx") + s(40);
+    var iconY = rectSystem.attr("cy") - s(35);
     if (system.iconImageURL) {
         paper.image(system.iconImageURL, iconX, iconY, 25, 25);
     }
-    ellipseSystem.attr({
+    rectSystem.attr({
         fill: sysColor,
         stroke: sysStroke,
         "stroke-width": sysStrokeWidth,
@@ -1411,11 +1411,11 @@ function ColorSystem(system, ellipseSystem, textSysName, textPilot) {
     }
 
     if (selected === false) {
-        ellipseSystem.sysInfoPnlID = 0;
+        rectSystem.sysInfoPnlID = 0;
         textSysName.sysInfoPnlID = 0;
 
-        ellipseSystem.hover(onSysOver, onSysOut);
-        textSysName.ellipseIndex = objSystems.length;
+        rectSystem.hover(onSysOver, onSysOut);
+        textSysName.rectIndex = objSystems.length;
         textSysName.hover(onSysOver, onSysOut);
     }
 }
@@ -1488,22 +1488,22 @@ function DrawWormholes(systemFrom, systemTo, textColor) {
 
     if (sysY1 != sysY2) {
         textCenterX -= s(10);
-        whFromSysX = textCenterX + s(23);
-        whToSysX = textCenterX - s(23);
+        whFromSysX = textCenterX + s(20);
+        whToSysX = textCenterX - s(20);
     } else {
         whFromSysY = textCenterY - s(10);
         whToSysY = textCenterY + s(10);
     }
 
-    // draws labels near systemTo ellipse if previous same Level X system's levelY = systemTo.levelY - 1
+    // draws labels near systemTo rect if previous same Level X system's levelY = systemTo.levelY - 1
     if (!zenMode) {
         if (changePos === true) {
 
             textCenterX = sysX2 - s(73);
             textCenterY = sysY2 - s(30);
             if (renderWormholeTags) {
-                whFromSysX = textCenterX + s(23);
-                whToSysX = textCenterX - s(23);
+                whFromSysX = textCenterX + s(20);
+                whToSysX = textCenterX - s(20);
             } else {
                 whFromSysX = textCenterX + s(35);
                 whToSysX = textCenterX - s(10);
@@ -1514,9 +1514,9 @@ function DrawWormholes(systemFrom, systemTo, textColor) {
 
         var whFromSys = null;
         var whToSys = null;
-        var whFromColor = null;
-        var whToColor = null;
-        var decoration = null;
+        var whFromColor = clearWhColor;
+        var whToColor = clearWhColor;
+        var decoration = 'none';
 
         if (systemTo.WhFromParentBubbled === true) {
             whFromColor = bubbledColor;

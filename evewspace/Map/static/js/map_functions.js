@@ -122,6 +122,17 @@ $(document).ready(function () {
         scale(baseScale);
     });
 
+    $('#systemTooltipHolder').on('click', '> div', function(){
+        var msID = parseInt(this.id.substr(3,this.id.length -6));
+        var sysID = GetSysID(msID);
+        DisplaySystemDetails(msID, sysID);
+        var div = $('#sys' + msID + "Tip").hide();
+
+        if (div[0]) {
+            div.hide();
+        }
+    });
+
     updateTimerID = setInterval(doMapAjaxCheckin, 5000);
     if (autoRefresh === true) {
         $('#btnRefreshToggle').text('Auto Refresh: ON');
@@ -403,19 +414,6 @@ function GetSystemTooltips() {
         url: address,
         success: function (data) {
             $('#systemTooltipHolder').html(data);
-            $('#systemTooltipHolder>div').off();
-            //clicking the tooltip acts as clicking the system 
-            //(IG browser can be sloppy)
-            $('#systemTooltipHolder>div').click(function(){
-                var msID = parseInt(this.id.substr(3,this.id.length -6));
-                var sysID = GetSysID(msID);
-                DisplaySystemDetails(msID, sysID);
-                var div = $('#sys' + msID + "Tip").hide();
-
-                if (div[0]) {
-                    div.hide();
-                }
-            });
         }
     });
 }

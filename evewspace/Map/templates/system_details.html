@@ -40,13 +40,13 @@
         </strong>
         </div>
         {% endif %}
-        {% if system.sysclass = 7 %}
+        {% if system.sysclass == 7 %}
         High Sec
         {% endif %}
-        {% if system.sysclass = 8 %}
+        {% if system.sysclass == 8 %}
         Low Sec
         {% endif %}
-        {% if system.sysclass = 9 %}
+        {% if system.sysclass == 9 %}
         Null Sec
         {% endif %}
         {% if system.is_kspace and is_igb %}
@@ -64,11 +64,11 @@
 </div>
     <div class="row span6">
     {% load humanize %}
-    <div class="visited">First Visit: {{system.first_visited|naturaltime}} &bull; Last Visit: {{system.last_visited|naturaltime}}</div>
+    <div class="visited">First visit: {{system.first_visited|naturaltime}} &bull; Last visit: {{system.last_visited|naturaltime}}</div>
     <div class="detailsLeft">
     {% if system.occupied or system.poses.all %}
     <div class="occupiedDiv label label-important">
-        <span class="occupiedTitle">Occupied:</span> <br /> {{system.occupied|linebreaks}}</p>
+        <span class="occupiedTitle">Occupied:</span> <br /> {{system.occupied|linebreaks}}
         Towers:
         <ul>
             {% for pos in system.poses.all %}
@@ -121,7 +121,7 @@
 </div>
 </div>
   <div id="sigsPanel" class="sigsPanel tab-pane">
-            <div id="sigAddPanel" class"sigAddPanel">
+            <div id="sigAddPanel" class="sigAddPanel">
                 <div style="margin-bottom: 10px; text-align: center;">
                     <h4>Signatures: {{system.name}}</h4>
                     {% if can_edit %}
@@ -179,4 +179,3 @@
         </div>
     </div>
 </div>
-</script>

@@ -94,6 +94,14 @@ function s(n) { //apply scaling factor, short function name so it's quick to typ
 }
 
 $(document).ready(function () {
+    // Make sure timers stop when unloading the page
+    $(window).bind('unload', function () {
+        if (sigTimerID) {
+            clearTimeout(sigTimerID);
+        }
+        clearTimeout(updateTimerID);
+    });
+
     $('.slider').slider({
             min: 0.5,
             max: 2.0,
@@ -106,6 +114,12 @@ $(document).ready(function () {
         }
     ).on('slide', function(e) {
         scale(e.value);
+    });
+
+    // Reset scale to baseScale value. At this time this does not reset the slider itself.
+    // TODO: Make it so it resets the slider position :P
+    $('#btnResetScale').click(function() {
+        scale(baseScale);
     });
 
     updateTimerID = setInterval(doMapAjaxCheckin, 5000);
@@ -135,17 +149,6 @@ $(document).ready(function () {
     } else {
         $('#btnPilotList').text("Pilot List: OFF");
     }
-});
-
-
-//Make sure timers stop when unloading the page
-$(document).ready(function () {
-    $(window).bind('unload', function () {
-        if (sigTimerID) {
-            clearTimeout(sigTimerID);
-        }
-        clearTimeout(updateTimerID);
-    });
 });
 
 function processAjax(data) {
@@ -232,8 +235,9 @@ function DisplaySystemDetails(msID, sysID) {
             });
             GetPOSList(sysID);
             GetDestinations(msID);
-            $('#btnImport').off();
-            $('#btnImport').click(function(e){
+            var btnImport = $('#btnImport');
+            btnImport.off();
+            btnImport.click(function(e){
                 BulkImport(msID);
             });
             focusMS = msID;
@@ -922,7 +926,7 @@ function ConnectSystems(obj1, obj2, line, bg, interest, dasharray) {
                 stroke: color,
                 fill: "none",
                 "stroke-dasharray": dasharray,
-                "stroke-width": interestWidth,
+                "stroke-width": interestWidth
             });
         } else {
             lineObj = paper.path(path).attr({
@@ -1659,14 +1663,6 @@ function scale(factor) {
     strokeWidth = s(baseStrokeWidth);
     interestWidth = s(baseInterestWidth);
     RefreshMap();
-}
-
-function ResetScale() {
-    // NOTE: This does NOT reset the slider.
-    // TODO: Make it so it resets the slider position :P
-    $('#btnResetScale').click(function() {
-        scale(baseScale);
-    });
 }
 
 function ToggleZen() {

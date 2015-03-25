@@ -135,30 +135,30 @@ $(document).ready(function () {
 
     updateTimerID = setInterval(doMapAjaxCheckin, 5000);
     if (autoRefresh === true) {
-        $('#btnRefreshToggle').text('Auto Refresh: ON');
+        $('#btnRefreshToggle').find('> span').text('ON');
         refreshTimerID = setInterval(RefreshMap, 15000);
     } else {
-        $('#btnRefreshToggle').text('Auto Refresh: OFF');
+        $('#btnRefreshToggle').find('> span').text('OFF');
     }
     if (silentSystem === true) {
-        $('#btnSilentAdd').text('Silent IGB Mapping: ON');
+        $('#btnSilentAdd').find('> span').text('ON');
     } else {
-        $('#btnSilentAdd').text('Silent IGB Mapping: OFF');
+        $('#btnSilentAdd').find('> span').text('OFF');
     }
     if (kspaceIGBMapping === true) {
-        $('#btnKspaceIGB').text('Map K-Space Connections: ON');
+        $('#btnKspaceIGB').find('> span').text('ON');
     } else {
-        $('#btnKspaceIGB').text('Map K-Space Connections: OFF');
+        $('#btnKspaceIGB').find('> span').text('OFF');
     }
     if (zenMode) {
-        $('#btnZen').text("Zen: ON");
+        $('#btnZen').find('> span').text('ON');
     } else {
-        $('#btnZen').text("Zen: OFF");
+        $('#btnZen').find('> span').text('OFF');
     }
     if (showPilotList) {
-        $('#btnPilotList').text("Pilot List: ON");
+        $('#btnPilotList').find('> span').text('ON');
     } else {
-        $('#btnPilotList').text("Pilot List: OFF");
+        $('#btnPilotList').find('> span').text('OFF');
     }
 });
 
@@ -199,20 +199,20 @@ function HideSystemDetails() {
 function ToggleSilentAdd() {
     if (silentSystem === false) {
         silentSystem = true;
-        $('#btnSilentAdd').text('Silent IGB Mapping: ON');
+        $('#btnSilentAdd').find('> span').text('ON');
     } else {
         silentSystem = false;
-        $('#btnSilentAdd').text('Silent IGB Mapping: OFF');
+        $('#btnSilentAdd').find('> span').text('OFF');
     }
 }
 
 function ToggleKspaceMapping() {
     if (kspaceIGBMapping === false) {
         kspaceIGBMapping = true;
-        $('#btnKspaceIGB').text('Map K-Space Connections: ON');
+        $('#btnKspaceIGB').find('> span').text('ON');
     } else {
         kspaceIGBMapping = false;
-        $('#btnKspaceIGB').text('Map K-Space Connections: OFF');
+        $('#btnKspaceIGB').find('> span').text('OFF');
     }
 }
 
@@ -220,12 +220,36 @@ function ToggleAutoRefresh() {
     if (autoRefresh === true) {
         autoRefresh = false;
         clearTimeout(refreshTimerID);
-        $('#btnRefreshToggle').text('Auto Refresh: OFF');
+        $('#btnRefreshToggle').find('> span').text('OFF');
     } else {
         autoRefresh = true;
         refreshTimerID = setInterval(RefreshMap, 15000);
-        $('#btnRefreshToggle').text('Auto Refresh: ON');
+        $('#btnRefreshToggle').find('> span').text('ON');
     }
+}
+
+function ToggleZen() {
+    if (zenMode === true) {
+        zenMode = false;
+        $('#btnZen').find('> span').text('OFF');
+    } else {
+        zenMode = true;
+        $('#btnZen').find('> span').text('ON');
+    }
+    RefreshMap();
+}
+
+function TogglePilotList() {
+    if (showPilotList === true) {
+        showPilotList = false;
+        highlightActivePilots = true;
+        $('#btnPilotList').text('OFF');
+    } else {
+        showPilotList = true;
+        highlightActivePilots = false;
+        $('#btnPilotList').text('ON');
+    }
+    RefreshMap();
 }
 
 function DisplaySystemDetails(msID, sysID) {
@@ -263,7 +287,7 @@ function GetPOSList(sysID) {
         type: "GET",
         url: address,
         success: function (data) {
-            var POSlist = $('#sys' + sysID + "POSDiv");
+            var POSlist = $('#sys' + sysID + 'POSDiv');
             POSlist.empty();
             POSlist.html(data);
         }
@@ -556,7 +580,7 @@ function EditSignature(msID, sigID) {
     $.ajax({
         url: address,
         type: "POST",
-        data: $("#sigEditForm").serialize(),
+        data: $('#sigEditForm').serialize(),
         success: function (data) {
             var sigAddForm = $('#sys' + msID + "SigAddForm");
             sigAddForm.empty();
@@ -599,7 +623,7 @@ function GetEditSignatureBox(msID, sigID) {
         url: address,
         type: "GET",
         success: function (data) {
-            var sigAddForm = $('#sys' + msID + "SigAddForm");
+            var sigAddForm = $('#sys' + msID + 'SigAddForm');
             sigAddForm.empty();
             sigAddForm.html(data);
             LoadSignatures(msID, false);
@@ -612,9 +636,9 @@ function AddSignature(msID) {
     $.ajax({
         url: address,
         type: "POST",
-        data: $("#sigAddForm").serialize(),
+        data: $('#sigAddForm').serialize(),
         success: function (data) {
-            var sigAddForm = $('#sys' + msID + "SigAddForm");
+            var sigAddForm = $('#sys' + msID + 'SigAddForm');
             sigAddForm.empty();
             sigAddForm.html(data);
             LoadSignatures(msID, false);
@@ -629,7 +653,7 @@ function LoadSignatures(msID, startTimer) {
         url: address,
         type: "GET",
         success: function (data) {
-            var signatures = $('#sys' + msID + "Signatures");
+            var signatures = $('#sys' + msID + 'Signatures');
             signatures.empty();
             signatures.html(data);
             if (startTimer) {
@@ -1603,7 +1627,7 @@ function getScrollX() {
 
 function onSysClick() {
     DisplaySystemDetails(this.msID, this.sysID);
-    var div = $('#sys' + this.msID + "Tip").hide();
+    var div = $('#sys' + this.msID + 'Tip').hide();
 
     if (div[0]) {
         div.hide();
@@ -1615,7 +1639,7 @@ function onSysDblClick() {
 }
 
 function onWhOver(e) {
-    var div = $('#wh' + this.whID + "Tip");
+    var div = $('#wh' + this.whID + 'Tip');
 
     if (div[0]) {
         var mouseX = e.clientX + getScrollX();
@@ -1627,7 +1651,7 @@ function onWhOver(e) {
 }
 
 function onWhOut() {
-    var div = $('#wh' + this.whID + "Tip");
+    var div = $('#wh' + this.whID + 'Tip');
 
     if (div[0]) {
         div.hide();
@@ -1635,7 +1659,7 @@ function onWhOut() {
 }
 
 function onSysOver(e) {
-    var div = $('#sys' + this.msID + "Tip");
+    var div = $('#sys' + this.msID + 'Tip');
     if (div[0]) {
         var mouseX = e.clientX + getScrollX();
         var mouseY = e.clientY + getScrollY();
@@ -1646,7 +1670,7 @@ function onSysOver(e) {
 }
 
 function onSysOut() {
-    var div = $('#sys' + this.msID + "Tip");
+    var div = $('#sys' + this.msID + 'Tip');
 
     if (div[0]) {
         div.hide();
@@ -1660,30 +1684,6 @@ function scale(factor) {
     indentY = s(baseIndentY);
     strokeWidth = s(baseStrokeWidth);
     interestWidth = s(baseInterestWidth);
-    RefreshMap();
-}
-
-function ToggleZen() {
-    if (zenMode === true) {
-        zenMode = false;
-        $('#btnZen').text("Zen: OFF");
-    } else {
-        zenMode = true;
-        $('#btnZen').text("Zen: ON");
-    }
-    RefreshMap();
-}
-
-function TogglePilotList() {
-    if (showPilotList === true) {
-        showPilotList = false;
-        highlightActivePilots = true;
-        $('#btnPilotList').text("Pilot List: OFF");
-    } else {
-        showPilotList = true;
-        highlightActivePilots = false;
-        $('#btnPilotList').text("Pilot List: ON");
-    }
     RefreshMap();
 }
 

@@ -243,11 +243,11 @@ function TogglePilotList() {
     if (showPilotList === true) {
         showPilotList = false;
         highlightActivePilots = true;
-        $('#btnPilotList').text('OFF');
+        $('#btnPilotList').find('> span').text('OFF');
     } else {
         showPilotList = true;
         highlightActivePilots = false;
-        $('#btnPilotList').text('ON');
+        $('#btnPilotList').find('> span').text('ON');
     }
     RefreshMap();
 }

@@ -26,11 +26,16 @@ var refreshTimerID;
 var systemsJSON;
 var activityLimit = 100;
 var scalingFactor = 1; //scale the interface
+var baseTextFontSize = 11;
 var textFontSize = 11; // The base font size
+var baseIndentX = 150;
 var indentX = 150; // The amount of space (in px) between system ellipses on the X axis. Should be between 120 and 180
+var baseIndentY = 70;
 var indentY = 70; // The amount of space (in px) between system ellipses on the Y axis.
-var strokeWidth = 3; // The width in px of the line connecting wormholes
-var interestWidth = 3; // The width in px of the line connecting wormholes when interest is on
+var baseStrokeWidth = 2;
+var strokeWidth = 1; // The width in px of the line connecting wormholes
+var baseInterestWidth = 4;
+var interestWidth = 4; // The width in px of the line connecting wormholes when interest is on
 var renderWormholeTags = true; // Determines whether wormhole types are shown on the map
 var sliceLastChars = false; // Friendly name: show first X characters if false; show last X characters if true.
 var sliceNumChars = 6; // Slice after this amount of characters.
@@ -937,7 +942,7 @@ function ConnectSystems(obj1, obj2, line, bg, interest, dasharray) {
         var lineObj;
         if (interest === true) {
             lineObj = paper.path(path).attr({
-                stroke: color,
+                stroke: "#FFF",
                 fill: "none",
                 "stroke-dasharray": dasharray,
                 "stroke-width": interestWidth,
@@ -1098,9 +1103,9 @@ function DrawSystem(system) {
     }
     var sysText;
     if (system.LevelX !== null && system.LevelX > 0) {
-        var childSys = paper.ellipse(sysX, sysY, s(40), s(28));
+        var childSys = paper.rect(sysX - s(28), sysY - s(25), s(56), s(50), 6);
         if (system.activePilots > 0 && highlightActivePilots === true) {
-            var notificationRing = paper.ellipse(sysX, sysY, s(45), s(33));
+            var notificationRing = paper.rect(sysX - s(28), sysY - s(25), s(56), s(50));
             notificationRing.attr({'stroke-dasharray': '--', 'stroke-width': s(1), 'stroke': '#ffffff'});
         }
         childSys.msID = system.msID;
@@ -1154,7 +1159,7 @@ function DrawSystem(system) {
             alert("Error processing system " + system.Name);
         }
     } else {
-        var rootSys = paper.ellipse(sysX, sysY, s(40), s(30));
+        var rootSys = paper.rect(sysX - s(28), sysY - s(25), s(56), s(50), 6);
         rootSys.msID = system.msID;
         rootSys.sysID = system.sysID;
         // Don't even get me started...
@@ -1268,9 +1273,9 @@ function ColorSystem(system, ellipseSystem, textSysName, textPilot) {
     if (system.msID === focusMS) {
         textColor = "#f0ff00";
         if (system.interest) {
-            sysStrokeWidth = s(7);
+            sysStrokeWidth = s(interestWidth);
         } else {
-            sysStrokeWidth = s(4);
+            sysStrokeWidth = s(strokeWidth);
         }
         sysStrokeDashArray = "- ";
     }
@@ -1485,8 +1490,8 @@ function DrawWormholes(systemFrom, systemTo, textColor) {
             textCenterX = sysX2 - s(73);
             textCenterY = sysY2 - s(30);
             if (renderWormholeTags) {
-                whFromSysX = textCenterX + s(23);
-                whToSysX = textCenterX - s(23);
+                whFromSysX = textCenterX + s(20);
+                whToSysX = textCenterX - s(20);
             } else {
                 whFromSysX = textCenterX + s(35);
                 whToSysX = textCenterX - s(10);
@@ -1526,7 +1531,7 @@ function DrawWormholes(systemFrom, systemTo, textColor) {
             }
 
             whFromSys = paper.text(whFromSysX, whFromSysY, whFromText);
-            whFromSys.attr({fill: whFromColor, cursor: "pointer", "font-size": s(11), "font-weight": decoration});  //stroke: "#fff"
+            whFromSys.attr({fill: whFromColor, cursor: "pointer", "font-size": s(10), "font-weight": decoration});  //stroke: "#fff"
             whFromSys.click(function () {
                 GetEditWormholeDialog(systemTo.whID);
             });
@@ -1537,7 +1542,7 @@ function DrawWormholes(systemFrom, systemTo, textColor) {
 
         if (systemTo.WhToParent) {
             whToSys = paper.text(whToSysX, whToSysY, whToText);
-            whToSys.attr({fill: whToColor, cursor: "pointer", "font-size": s(11), "font-weight": decoration});
+            whToSys.attr({fill: whToColor, cursor: "pointer", "font-size": s(10), "font-weight": decoration});
 
             whToSys.whID = systemTo.whID;
             whToSys.click(function () {
@@ -1661,11 +1666,11 @@ function onSysOut() {
 
 function scale(factor) {
     scalingFactor = factor;
-    textFontSize = s(11); // The base font size
-    indentX = s(150); // The amount of space (in px) between system ellipses on the X axis. Should be between 120 and 180
-    indentY = s(70); // The amount of space (in px) between system ellipses on the Y axis.
-    strokeWidth = s(3); // The width in px of the line connecting wormholes
-    interestWidth = s(3); // The width in px of the line connecting wormholes when interest is on
+    textFontSize = s(baseTextFontSize); // The base font size
+    indentX = s(baseIndentX); // The amount of space (in px) between system ellipses on the X axis. Should be between 120 and 180
+    indentY = s(baseIndentY); // The amount of space (in px) between system ellipses on the Y axis.
+    strokeWidth = s(baseStrokeWidth); // The width in px of the line connecting wormholes
+    interestWidth = s(baseInterestWidth); // The width in px of the line connecting wormholes when interest is on
     RefreshMap();
 }
 

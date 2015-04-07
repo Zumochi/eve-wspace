@@ -30,10 +30,10 @@ var textFontSize, indentX, indentY, strokeWidth, interestWidth; // Initialize sc
 var baseTextFontSize = 11; // The base font size
 var baseLabelTextFontSize = 11;
 var baseTextFontSizeZen = 16; // The base font size when zen mode is on.
-var baseIndentX = 150; // The amount of space (in px) between system ellipses on the X axis. Should be between 120 and 180
+var baseIndentX = 120; // The amount of space (in px) between system ellipses on the X axis. Should be between 120 and 180
 var baseIndentY = 70; // The amount of space (in px) between system ellipses on the Y axis.
 var baseStrokeWidth = 2; // The width in px of the line connecting wormholes
-var baseInterestWidth = 3; // The width in px of the line connecting wormholes when interest is on
+var baseInterestWidth = 4; // The width in px of the line connecting wormholes when interest is on
 var renderWormholeTags = true; // Determines whether wormhole types are shown on the map
 var sliceLastChars = false; // Friendly name: show first X characters if false; show last X characters if true.
 var sliceNumChars = 6; // Slice after this amount of characters.
@@ -1101,7 +1101,7 @@ function DrawSystem(system) {
     }
     var sysText;
     if (system.LevelX !== null && system.LevelX > 0) {
-        var childSys = paper.rect(sysX - s(28), sysY - s(25), s(56), s(50), 6);
+        var childSys = paper.rect(sysX - s(28), sysY - s(25), s(56), s(50), s(6));
         if (system.activePilots > 0 && highlightActivePilots === true) {
             var notificationRing = paper.rect(sysX - s(28), sysY - s(25), s(56), s(50));
             notificationRing.attr({'stroke-dasharray': '--', 'stroke-width': s(1), 'stroke': '#ffffff'});
@@ -1115,8 +1115,7 @@ function DrawSystem(system) {
 
         // Don't even get me started...
         if (system.backgroundImageURL) {
-            // TODO: Fix positioning and size of important and dangerous systems.
-            paper.image(system.backgroundImageURL, childSys.attr("cx") - s(28), childSys.attr("cy") - s(28), s(55), s(55));
+            paper.image(system.backgroundImageURL, childSys.attr("x") + s(5), childSys.attr("y") + s(2), s(44), s(44));
         }
         sysText = paper.text(sysX, sysY, sysName);
         sysText.attr({"font-weight": 'bold'});
@@ -1158,13 +1157,12 @@ function DrawSystem(system) {
             alert("Error processing system " + system.Name);
         }
     } else {
-        var rootSys = paper.rect(sysX - s(28), sysY - s(25), s(56), s(50), 6);
+        var rootSys = paper.rect(sysX - s(28), sysY - s(25), s(56), s(50), s(6));
         rootSys.msID = system.msID;
         rootSys.sysID = system.sysID;
         // Don't even get me started...
         if (system.backgroundImageURL) {
-            // TODO: Fix positioning and size of important and dangerous systems.
-            paper.image(system.backgroundImageURL, rootSys.attr("cx") - s(28), rootSys.attr("cy") - s(28), s(55), s(55));
+            paper.image(system.backgroundImageURL, rootSys.attr("x") + s(5), rootSys.attr("y") + s(2), s(44), s(44));
         }
         rootSys.click(onSysClick);
         sysText = paper.text(sysX, sysY, sysName);

@@ -1115,6 +1115,7 @@ function DrawSystem(system) {
 
         // Don't even get me started...
         if (system.backgroundImageURL) {
+            // TODO: Fix positioning and size of important and dangerous systems.
             paper.image(system.backgroundImageURL, childSys.attr("cx") - s(28), childSys.attr("cy") - s(28), s(55), s(55));
         }
         sysText = paper.text(sysX, sysY, sysName);
@@ -1162,6 +1163,7 @@ function DrawSystem(system) {
         rootSys.sysID = system.sysID;
         // Don't even get me started...
         if (system.backgroundImageURL) {
+            // TODO: Fix positioning and size of important and dangerous systems.
             paper.image(system.backgroundImageURL, rootSys.attr("cx") - s(28), rootSys.attr("cy") - s(28), s(55), s(55));
         }
         rootSys.click(onSysClick);

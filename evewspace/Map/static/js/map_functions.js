@@ -1160,8 +1160,8 @@ function DrawSystem(system) {
             if (system.interestpath === true || system.interest === true) {
                 interest = true;
             }
-            if (childSys.collapsed === false || renderCollapsedConnections === true) {
-                ConnectSystems(parentSysRectangle, childSys, lineColor, "#fff", interest, dasharray);
+            if (curSys.collapsed === false || renderCollapsedConnections === true) {
+                ConnectSystems(parentSysRectangle, curSys, lineColor, "#fff", interest, dasharray);
                 DrawWormholes(parentSys, system, whColor);
             }
         } else {

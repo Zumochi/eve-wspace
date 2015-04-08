@@ -30,7 +30,7 @@ var textFontSize, indentX, indentY, strokeWidth, interestWidth; // Initialize sc
 var baseTextFontSize = 11; // The base font size
 var baseLabelTextFontSize = 11;
 var baseTextFontSizeZen = 16; // The base font size when zen mode is on.
-var baseIndentX = 120; // The amount of space (in px) between system rectangles on the X axis. Should be between 120 and 180
+var baseIndentX = 140; // The amount of space (in px) between system rectangles on the X axis. Should be between 120 and 180
 var baseIndentY = 70; // The amount of space (in px) between system rectangles on the Y axis.
 var baseStrokeWidth = 2; // The width in px of the line connecting wormholes
 var baseInterestWidth = 4; // The width in px of the line connecting wormholes when interest is on
@@ -43,8 +43,8 @@ var interestColor = "#FFFFFF";
 var goodColor = "#00FF00"; // Color of good status connections
 var goodColor_zen = "#999"; // Color of good status connections
 var badColor = "#FF0000"; // Color of first shrink connections
-var bubbledColor = "#FF0000"; // Color of first shrink connections
-var clearWhColor = "#BBFFBB"; // Color of good status connections
+var bubbledColor = "#FF0000"; // Color of bubbled connections
+var clearWhColor = "#FAFA33"; // Color of good status connections
 var warningColor = "#FF00FF"; // Color of mass critical connections
 var sysColor_zen = "#222"; //color for eol
 var frigWhColor = "#FFFFFF"; // Color of Hyperion Frigate Hole
@@ -1454,7 +1454,7 @@ function DrawWormholes(systemFrom, systemTo, textColor) {
         whToSysY = textCenterY + s(10);
     }
 
-    // Draws labels near systemTo ellipse if previous same Level X system's levelY = systemTo.levelY - 1
+    // Draws labels near systemTo rectangle if previous same Level X system's levelY = systemTo.levelY - 1
     if (zenMode === false) {
         if (changePos === true) {
 

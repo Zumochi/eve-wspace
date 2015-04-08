@@ -39,6 +39,7 @@ var sliceLastChars = false; // Friendly name: show first X characters if false; 
 var sliceNumChars = 6; // Slice after this amount of characters.
 var showPilotList = true; // Show pilot names under systems
 var highlightActivePilots = false; // Draw a notification ring around systems with active pilots.
+var interestColor = "#FFFFFF";
 var goodColor = "#00FF00"; // Color of good status connections
 var goodColor_zen = "#999"; // Color of good status connections
 var badColor = "#FF0000"; // Color of first shrink connections
@@ -940,7 +941,7 @@ function ConnectSystems(obj1, obj2, line, bg, interest, dasharray) {
         var lineObj;
         if (interest === true) {
             lineObj = paper.path(path).attr({
-                stroke: "#FFF",
+                stroke: interestColor,
                 fill: "none",
                 "stroke-dasharray": dasharray,
                 "stroke-width": interestWidth
@@ -1107,7 +1108,7 @@ function DrawSystem(system) {
 
     // Draw the system background image if important or dangerous is set.
     if (system.backgroundImageURL) {
-        paper.image(system.backgroundImageURL, rootSys.attr("x") + s(5), rootSys.attr("y") + s(2), s(44), s(44));
+        paper.image(system.backgroundImageURL, curSys.attr("x") + s(5), curSys.attr("y") + s(2), s(44), s(44));
     }
 
     sysText = paper.text(sysX, sysY, sysName);
@@ -1160,7 +1161,7 @@ function DrawSystem(system) {
                 interest = true;
             }
             if (curSys.collapsed === false || renderCollapsedConnections === true) {
-                ConnectSystems(parentSysRectangle, childSys, lineColor, "#fff", interest, dasharray);
+                ConnectSystems(parentSysRectangle, curSys, lineColor, "#fff", interest, dasharray);
                 DrawWormholes(parentSys, system, whColor);
             }
         } else {

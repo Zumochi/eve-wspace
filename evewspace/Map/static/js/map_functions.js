@@ -129,13 +129,13 @@ $(document).ready(function () {
         $('#btnKspaceIGB').find('> span').text('OFF');
     }
 
-    if (zenMode) {
+    if (zenMode === true) {
         $('#btnZen').find('> span').text('ON');
     } else {
         $('#btnZen').find('> span').text('OFF');
     }
 
-    if (showPilotList) {
+    if (showPilotList === true) {
         $('#btnPilotList').find('> span').text('ON');
     } else {
         $('#btnPilotList').find('> span').text('OFF');
@@ -147,7 +147,7 @@ $(document).ready(function () {
         var msID = parseInt(this.id.substr(3, this.id.length - 6));
         var sysID = GetSysID(msID);
         DisplaySystemDetails(msID, sysID);
-        var div = $('#sys' + msID + "Tip").hide();
+        var div = $('#sys' + msID + 'Tip').hide();
 
         if (div[0]) {
             div.hide();
@@ -175,7 +175,7 @@ function processAjax(data) {
 }
 
 function doMapAjaxCheckin() {
-    var currentPath = "update/";
+    var currentPath = 'update/';
     if (loadtime !== null) {
         $.ajax({
             type: "POST",
@@ -196,55 +196,55 @@ function HideSystemDetails() {
 function ToggleSilentAdd() {
     if (silentSystem === false) {
         silentSystem = true;
-        $('#btnSilentAdd').text('Silent IGB Mapping: ON');
+        $('#btnSilentAdd').find('> span').text('ON');
     } else {
         silentSystem = false;
-        $('#btnSilentAdd').text('Silent IGB Mapping: OFF');
+        $('#btnSilentAdd').find('> span').text('OFF');
     }
 }
 
 function ToggleKspaceMapping() {
     if (kspaceIGBMapping === false) {
         kspaceIGBMapping = true;
-        $('#btnKspaceIGB').text('Map K-Space Connections: ON');
+        $('#btnKspaceIGB').find('> span').text('ON');
     } else {
         kspaceIGBMapping = false;
-        $('#btnKspaceIGB').text('Map K-Space Connections: OFF');
+        $('#btnKspaceIGB').find('> span').text('OFF');
     }
 }
 
 function ToggleAutoRefresh() {
-    if (autoRefresh === true) {
-        autoRefresh = false;
-        clearTimeout(refreshTimerID);
-        $('#btnRefreshToggle').text('Auto Refresh: OFF');
-    } else {
+    if (autoRefresh === false) {
         autoRefresh = true;
         refreshTimerID = setInterval(RefreshMap, 15000);
         $('#btnRefreshToggle').text('Auto Refresh: ON');
+    } else {
+        autoRefresh = false;
+        clearTimeout(refreshTimerID);
+        $('#btnRefreshToggle').text('Auto Refresh: OFF');
     }
 }
 
 function ToggleZen() {
-    if (zenMode === true) {
-        zenMode = false;
-        $('#btnZen').text("Zen: OFF");
-    } else {
+    if (zenMode === false) {
         zenMode = true;
-        $('#btnZen').text("Zen: ON");
+        $('#btnZen').find('> span').text('ON');
+    } else {
+        zenMode = false;
+        $('#btnZen').find('> span').text('OFF');
     }
     RefreshMap();
 }
 
 function TogglePilotList() {
-    if (showPilotList === true) {
-        showPilotList = false;
-        highlightActivePilots = true;
-        $('#btnPilotList').text("Pilot List: OFF");
-    } else {
+    if (showPilotList === false) {
         showPilotList = true;
         highlightActivePilots = false;
         $('#btnPilotList').text("Pilot List: ON");
+    } else {
+        showPilotList = false;
+        highlightActivePilots = true;
+        $('#btnPilotList').text("Pilot List: OFF");
     }
     RefreshMap();
 }
@@ -932,7 +932,7 @@ function ConnectSystems(obj1, obj2, line, bg, interest, dasharray) {
         line.line.attr({path: path});
     } else {
         var color = typeof line === "string" ? line : "#000";
-        if (!renderWormholeTags) {
+        if (renderWormholeTags === false) {
             if (systemTo.WhFromParentBubbled || systemTo.WhToParentBubbled) {
                 color = "#FF9900";
             }
@@ -1013,8 +1013,7 @@ function DrawSystem(system) {
     if (system === null) {
         return;
     }
-    var sysX = GetSystemX(system);
-    var sysY = GetSystemY(system);
+
     var classString;
     switch (system.SysClass) {
         case 7:
@@ -1060,6 +1059,7 @@ function DrawSystem(system) {
             effectString = "";
             break;
     }
+
     var friendly = "";
     if (system.Friendly) {
         if (system.Friendly.length > sliceNumChars) {
@@ -1071,8 +1071,10 @@ function DrawSystem(system) {
         }
         friendly = system.Friendly + "\n";
     }
+
     var sysName = friendly + system.Name + "\n" + classString + effectString + "(" + system.activePilots + ")";
-    if (zenMode) {
+
+    if (zenMode === true) {
         if ((classString === "H") || (classString === "N") || (classString === "L") || (classString === "T")) {
             sysName = friendly + system.Name.substr(0, sliceNumChars);
         } else {
@@ -1080,63 +1082,71 @@ function DrawSystem(system) {
         }
     }
     var pilotText = "";
-    var pilotsadded = 0;
     if (system.activePilots) {
-        if (system.activePilots === 1) {
-            pilotText += system.pilot_list[0];
-        } else {
-            for (var i = 0; i < system.pilot_list.length; i++) {
-                var pilot = system.pilot_list[i].substr(0, 5);
-                pilotsadded++;
-                if (pilotText !== "") pilotText += ",";
-                pilotText += pilot;
-                if (pilotText.length > 18) {
-                    if (system.pilot_list_length > pilotsadded) {
-                        pilotText += "+" + (system.pilot_list.length - pilotsadded);
-                    }
-                    break;
-                }
+        for (var i = 0; i < system.pilot_list.length; i++) {
+            if (typeof (system.pilot_list[i]) === "undefined") {
+                pilotText += "Unknown";
+            } else var pilot = system.pilot_list[i].substr(0, 5);
+
+            if (pilotText !== "") pilotText += ",";
+            pilotText += pilot;
+
+            if (pilotText.length > 18) {
+                if (system.pilot_list.length > i) pilotText += "+" + (system.pilot_list.length - i);
+                break;
             }
         }
     }
-    var sysText;
-    if (system.LevelX !== null && system.LevelX > 0) {
-        var childSys = paper.rect(sysX - s(28), sysY - s(25), s(56), s(50), s(6));
+
+    var sysX, sysY, sysText, curSys;
+    sysX = GetSystemX(system);
+    sysY = GetSystemY(system);
+    curSys = paper.rect(sysX - s(28), sysY - s(25), s(56), s(50), s(6));
+    curSys.msID = system.msID;
+    curSys.sysID = system.sysID;
+
+    // Draw the system background image if important or dangerous is set.
+    if (system.backgroundImageURL) {
+        paper.image(system.backgroundImageURL, rootSys.attr("x") + s(5), rootSys.attr("y") + s(2), s(44), s(44));
+    }
+
+    sysText = paper.text(sysX, sysY, sysName);
+    sysText.attr({"font-weight": 'bold'});
+    sysText.msID = system.msID;
+    sysText.sysID = system.sysID;
+    curSys.click(onSysClick);
+    sysText.click(onSysClick);
+
+    // Open system information window if IGB is used.
+    if (is_igb === true) {
+        curSys.dblclick(onSysDblClick);
+        sysText.dblclick(onSysDblClick);
+    }
+
+    if (showPilotList === true) {
+        pilotText = paper.text(sysX, sysY + s(32), pilotText);
+        pilotText.msID = system.msID;
+        pilotText.sysID = system.sysID;
+    } else {
+        pilotText = null;
+    }
+
+    ColorSystem(system, curSys, sysText, pilotText);
+    objSystems.push(curSys);
+
+    // This only executes on non-root systems.
+    if (system.LevelX > 0 && system.LevelX > 0) {
+        // Show a notification ring around systems that have other clients with the mapper open.
         if (system.activePilots > 0 && highlightActivePilots === true) {
             var notificationRing = paper.rect(sysX - s(28), sysY - s(25), s(56), s(50), s(4));
             notificationRing.attr({'stroke-dasharray': '--', 'stroke-width': s(1), 'stroke': '#ffffff'});
         }
-        childSys.msID = system.msID;
-        childSys.whID = system.whID;
-        childSys.sysID = system.sysID;
-        childSys.WhFromParentBubbled = system.WhFromParentBubbled;
-        childSys.WhToParentBubbled = system.WhToParentBubbled;
-        childSys.click(onSysClick);
 
-        // Don't even get me started...
-        if (system.backgroundImageURL) {
-            paper.image(system.backgroundImageURL, childSys.attr("x") + s(5), childSys.attr("y") + s(2), s(44), s(44));
-        }
-        sysText = paper.text(sysX, sysY, sysName);
-        sysText.attr({"font-weight": 'bold'});
-        sysText.msID = system.msID;
-        sysText.sysID = system.sysID;
-        sysText.click(onSysClick);
-        if (is_igb === true) {
-            childSys.dblclick(onSysDblClick);
-            sysText.dblclick(onSysDblClick);
-        }
-        if (showPilotList) {
-            pilotText = paper.text(sysX, sysY + s(32), pilotText);
-            pilotText.msID = system.msID;
-            pilotText.sysID = system.sysID;
-            pilotText.click(onSysClick);
-        } else {
-            pilotText = null;
-        }
-        ColorSystem(system, childSys, sysText, pilotText);
-        childSys.collapsed = system.collapsed;
-        objSystems.push(childSys);
+        curSys.whID = system.whID;
+        curSys.WhFromParentBubbled = system.WhFromParentBubbled;
+        curSys.WhToParentBubbled = system.WhToParentBubbled;
+        curSys.collapsed = system.collapsed;
+
         var parentIndex = GetSystemIndex(system.ParentID);
         var parentSys = systemsJSON[parentIndex];
         var parentSysRectangle = objSystems[parentIndex];
@@ -1149,41 +1159,13 @@ function DrawSystem(system) {
             if (system.interestpath === true || system.interest === true) {
                 interest = true;
             }
-            if (childSys.collapsed === false || renderCollapsedConnections === true) {
+            if (curSys.collapsed === false || renderCollapsedConnections === true) {
                 ConnectSystems(parentSysRectangle, childSys, lineColor, "#fff", interest, dasharray);
                 DrawWormholes(parentSys, system, whColor);
             }
         } else {
             alert("Error processing system " + system.Name);
         }
-    } else {
-        var rootSys = paper.rect(sysX - s(28), sysY - s(25), s(56), s(50), s(6));
-        rootSys.msID = system.msID;
-        rootSys.sysID = system.sysID;
-        // Don't even get me started...
-        if (system.backgroundImageURL) {
-            paper.image(system.backgroundImageURL, rootSys.attr("x") + s(5), rootSys.attr("y") + s(2), s(44), s(44));
-        }
-        rootSys.click(onSysClick);
-        sysText = paper.text(sysX, sysY, sysName);
-        sysText.attr({"font-weight": 'bold'});
-        sysText.msID = system.msID;
-        sysText.sysID = system.sysID;
-        sysText.click(onSysClick);
-        if (is_igb === true) {
-            rootSys.dblclick(onSysDblClick);
-            sysText.dblclick(onSysDblClick);
-        }
-        if (showPilotList) {
-            pilotText = paper.text(sysX, sysY + s(35), pilotText);
-            pilotText.msID = system.msID;
-            pilotText.sysID = system.sysID;
-            pilotText.click(onSysClick);
-        } else {
-            pilotText = null;
-        }
-        ColorSystem(system, rootSys, sysText, pilotText);
-        objSystems.push(rootSys);
     }
 }
 
@@ -1253,7 +1235,7 @@ function GetWormholeColor(system) {
     }
 }
 
-function ColorSystem(system, rectangleSystem, textSysName, textPilot) {
+function ColorSystem(system, rectangleSystem, textSysName, pilotList) {
     if (!system) {
         alert("system is null or undefined");
         return;
@@ -1263,8 +1245,13 @@ function ColorSystem(system, rectangleSystem, textSysName, textPilot) {
     var sysStroke = "#fff";
     var sysStrokeWidth;
     var sysStrokeDashArray = "none";
-    var textColor = "#000";
+    var textColor = systemTextColor;
 
+    // TODO: Figure out rare case where a system has interest and/or focus,
+    // and still doesn't get a larger stroke applied.
+    // system.interest can be true or false (bool) or null (object).
+    // system.msID === focusMS gets passed, color gets applied.
+    // system.interest !== true in system.msID === focusMS sometimes gets skipped.
     if (system.interest === true) {
         sysStrokeWidth = s(baseInterestWidth + 4);
         sysStrokeDashArray = "--";
@@ -1274,13 +1261,11 @@ function ColorSystem(system, rectangleSystem, textSysName, textPilot) {
         textColor = "#f0ff00";
         sysStrokeDashArray = "- ";
 
-        if (!system.interest) {
+        if (system.interest !== true) {
             sysStrokeWidth = s(baseStrokeWidth + 2);
         }
-    }
-
-    if (system.interest === false && (system.msID !== focusMS)) {
-        sysStrokeWidth = s(baseStrokeWidth)
+    } else if (system.interest !== true) {
+        sysStrokeWidth = s(baseStrokeWidth);
     }
 
     // not selected
@@ -1289,72 +1274,60 @@ function ColorSystem(system, rectangleSystem, textSysName, textPilot) {
         case 9:
             sysColor = colorNullSec;
             sysStroke = borderColorNullSec;
-            textColor = systemTextColor;
             break;
         // Low
         case 8:
             sysColor = colorLowSec;
             sysStroke = borderColorLowSec;
-            textColor = systemTextColor;
             break;
         // High
         case 7:
             sysColor = colorHighSec;
             sysStroke = borderColorHighSec;
-            textColor = systemTextColor;
             break;
         case 6:
             sysColor = colorC6;
             sysStroke = WormholeEffectColor(system, borderColorC6);
-            if ((sysStroke !== borderColorC6) && (!zenMode)) sysStrokeWidth = s(baseStrokeWidth + 1);
-            textColor = systemTextColor;
+            if ((sysStroke !== borderColorC6) && (zenMode === false)) sysStrokeWidth = s(baseStrokeWidth + 1);
             break;
         case 5:
             sysColor = colorC5;
             sysStroke = WormholeEffectColor(system, borderColorC5);
-            if ((sysStroke !== borderColorC5) && (!zenMode)) sysStrokeWidth = s(baseStrokeWidth + 1);
-            textColor = systemTextColor;
+            if ((sysStroke !== borderColorC5) && (zenMode === false)) sysStrokeWidth = s(baseStrokeWidth + 1);
             break;
         case 4:
             sysColor = colorC4;
             sysStroke = WormholeEffectColor(system, borderColorC4);
-            if ((sysStroke !== borderColorC4) && (!zenMode)) sysStrokeWidth = s(baseStrokeWidth + 1);
-            textColor = systemTextColor;
+            if ((sysStroke !== borderColorC4) && (zenMode === false)) sysStrokeWidth = s(baseStrokeWidth + 1);
             break;
         case 3:
             sysColor = colorC3;
             sysStroke = WormholeEffectColor(system, borderColorC3);
-            if ((sysStroke !== borderColorC3) && (!zenMode)) sysStrokeWidth = s(baseStrokeWidth + 1);
-            textColor = systemTextColor;
+            if ((sysStroke !== borderColorC3) && (zenMode === false)) sysStrokeWidth = s(baseStrokeWidth + 1);
             break;
         case 2:
             sysColor = colorC2;
             sysStroke = WormholeEffectColor(system, borderColorC2);
-            if ((sysStroke !== borderColorC2) && (!zenMode)) sysStrokeWidth = s(baseStrokeWidth + 1);
-            textColor = systemTextColor;
+            if ((sysStroke !== borderColorC2) && (zenMode === false)) sysStrokeWidth = s(baseStrokeWidth + 1);
             break;
         case 1:
             sysColor = colorC1;
             sysStroke = WormholeEffectColor(system, borderColorC1);
-            if ((sysStroke !== borderColorC1) && (!zenMode)) sysStrokeWidth = s(baseStrokeWidth);
-            textColor = systemTextColor;
+            if ((sysStroke !== borderColorC1) && (zenMode === false)) sysStrokeWidth = s(baseStrokeWidth);
             break;
         // Thera
         case 12:
             sysColor = colorThera;
             sysStroke = borderColorThera;
-            textColor = systemTextColor;
             break;
         // Small Ship Hole
         case 13:
             sysColor = colorSmallShipHole;
             sysStroke = borderColorSmallShipHole;
-            textColor = systemTextColor;
             break;
         default:
             sysColor = "#000";
             sysStroke = "#fff";
-            textColor = systemTextColor;
             break;
     }
 
@@ -1396,7 +1369,7 @@ function ColorSystem(system, rectangleSystem, textSysName, textPilot) {
         "stroke-dasharray": sysStrokeDashArray
     });
     textSysName.attr({fill: textColor, "font-size": labelFontSize, cursor: "pointer"});
-    if (textPilot !== null) textPilot.attr({fill: pilotColor, "font-size": textFontSize - s(1), cursor: "pointer"});
+    if (pilotList !== null) pilotList.attr({fill: pilotColor, "font-size": textFontSize - s(1), cursor: "pointer"});
 
     rectangleSystem.sysInfoPnlID = 0;
     textSysName.sysInfoPnlID = 0;
@@ -1480,8 +1453,8 @@ function DrawWormholes(systemFrom, systemTo, textColor) {
         whToSysY = textCenterY + s(10);
     }
 
-    // Draws labels near systemTo rectangle if previous same Level X system's levelY = systemTo.levelY - 1
-    if (!zenMode) {
+    // Draws labels near systemTo ellipse if previous same Level X system's levelY = systemTo.levelY - 1
+    if (zenMode === false) {
         if (changePos === true) {
 
             textCenterX = sysX2 - s(73);
@@ -1526,7 +1499,7 @@ function DrawWormholes(systemFrom, systemTo, textColor) {
             }
 
             whFromSys = paper.text(whFromSysX, whFromSysY, whFromText);
-            whFromSys.attr({fill: whFromColor, cursor: "pointer", "font-size": s(baseLabelTextFontSize), "font-weight": decoration});  //stroke: "#fff"
+            whFromSys.attr({fill: whFromColor, cursor: "pointer", "font-size": s(baseLabelTextFontSize), "font-weight": decoration});
             whFromSys.click(function () {
                 GetEditWormholeDialog(systemTo.whID);
             });
